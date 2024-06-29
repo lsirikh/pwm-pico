@@ -2356,3 +2356,6 @@ CMakeFiles/robot_pwm.dir/src/motor_control.cpp.obj
  /home/ubuntu/pico/pwm-pico/src/motor_control.cpp
  generated/pico_base/pico/config_autogen.h
  generated/pico_base/pico/version.h
+CMakeFiles/robot_pwm.dir/src/pid.cpp.obj
+ ../include/pid.h
+ /home/ubuntu/pico/pwm-pico/src/pid.cpp

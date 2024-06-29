@@ -5,11 +5,11 @@
 #include "math.h"
 
 //모터(Left) 최대/최소 속도
-#define L_MOTOR_MIN_SPEED -1.5f
-#define L_MOTOR_MAX_SPEED 1.5f
+#define L_MOTOR_MIN_SPEED -1.0f
+#define L_MOTOR_MAX_SPEED 1.0f
 //모터(Right) 최대/최소 속도
-#define R_MOTOR_MIN_SPEED -1.5f
-#define R_MOTOR_MAX_SPEED 1.5f
+#define R_MOTOR_MIN_SPEED -1.0f
+#define R_MOTOR_MAX_SPEED 1.0f
 
 
 //Motor spec
