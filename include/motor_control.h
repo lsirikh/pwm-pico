@@ -7,7 +7,7 @@
 #include "hardware/pwm.h"
 
 // Define PWM resolution
-#define TOP 255
+#define TOP 4095
 #define SYSTEM_CLOCK 125000000  // 125 MHz
 #define PWM_FREQUENCY 19500  // 20 kHz
 

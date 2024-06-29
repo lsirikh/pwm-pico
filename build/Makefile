@@ -1973,6 +1973,33 @@ src/motor_control.cpp.s:
 	$(MAKE) -f CMakeFiles/robot_pwm.dir/build.make CMakeFiles/robot_pwm.dir/src/motor_control.cpp.s
 .PHONY : src/motor_control.cpp.s
 
+src/pid.obj: src/pid.cpp.obj
+
+.PHONY : src/pid.obj
+
+# target to build an object file
+src/pid.cpp.obj:
+	$(MAKE) -f CMakeFiles/robot_pwm.dir/build.make CMakeFiles/robot_pwm.dir/src/pid.cpp.obj
+.PHONY : src/pid.cpp.obj
+
+src/pid.i: src/pid.cpp.i
+
+.PHONY : src/pid.i
+
+# target to preprocess a source file
+src/pid.cpp.i:
+	$(MAKE) -f CMakeFiles/robot_pwm.dir/build.make CMakeFiles/robot_pwm.dir/src/pid.cpp.i
+.PHONY : src/pid.cpp.i
+
+src/pid.s: src/pid.cpp.s
+
+.PHONY : src/pid.s
+
+# target to generate assembly for a file
+src/pid.cpp.s:
+	$(MAKE) -f CMakeFiles/robot_pwm.dir/build.make CMakeFiles/robot_pwm.dir/src/pid.cpp.s
+.PHONY : src/pid.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -2184,6 +2211,9 @@ help:
 	@echo "... src/motor_control.obj"
 	@echo "... src/motor_control.i"
 	@echo "... src/motor_control.s"
+	@echo "... src/pid.obj"
+	@echo "... src/pid.i"
+	@echo "... src/pid.s"
 .PHONY : help
 
 

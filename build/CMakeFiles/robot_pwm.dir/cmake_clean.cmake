@@ -71,6 +71,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/robot_pwm.dir/home/ubuntu/pico/pico-sdk/src/rp2_common/pico_unique_id/unique_id.c.obj"
   "CMakeFiles/robot_pwm.dir/main.cpp.obj"
   "CMakeFiles/robot_pwm.dir/src/motor_control.cpp.obj"
+  "CMakeFiles/robot_pwm.dir/src/pid.cpp.obj"
   "robot_pwm.elf"
   "robot_pwm.pdb"
 )

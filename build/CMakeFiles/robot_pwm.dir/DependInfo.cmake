@@ -290,6 +290,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/ubuntu/pico/pico-sdk/src/rp2_common/pico_standard_link/new_delete.cpp" "/home/ubuntu/pico/pwm-pico/build/CMakeFiles/robot_pwm.dir/home/ubuntu/pico/pico-sdk/src/rp2_common/pico_standard_link/new_delete.cpp.obj"
   "/home/ubuntu/pico/pwm-pico/main.cpp" "/home/ubuntu/pico/pwm-pico/build/CMakeFiles/robot_pwm.dir/main.cpp.obj"
   "/home/ubuntu/pico/pwm-pico/src/motor_control.cpp" "/home/ubuntu/pico/pwm-pico/build/CMakeFiles/robot_pwm.dir/src/motor_control.cpp.obj"
+  "/home/ubuntu/pico/pwm-pico/src/pid.cpp" "/home/ubuntu/pico/pwm-pico/build/CMakeFiles/robot_pwm.dir/src/pid.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
