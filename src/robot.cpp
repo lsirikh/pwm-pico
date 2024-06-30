@@ -133,7 +133,7 @@ void Robot::setUnicycle(float v, float w)
 
     _linear = v; // 로봇의 직선 속도 설정
     _angular = w; // 로봇의 각속도 설정
-    printf("v: %f, w: %f, v_l: %f, v_r: %f\n\r", v, w, v_l, v_r); // 디버깅을 위해 출력
+    //printf("v: %f, w: %f, v_l: %f, v_r: %f\n\r", v, w, v_l, v_r); // 디버깅을 위해 출력
     setTargetSpeed(v_l, v_r); // 바퀴 속도 설정 함수 호출
 }
 

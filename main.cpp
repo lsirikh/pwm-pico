@@ -49,7 +49,7 @@ RobotPins robot_pins = {
 
 //Robot class 생성
 Robot robot(
-        0.1, 0.001, 0.00,
+        1.0, 0.001, 0.00,
         LED_PIN,
         robot_pins
         );
@@ -65,7 +65,6 @@ volatile bool timer_flag = false;
 
 const int sample_time_ms = 20;
 const int print_interval_ms = 200;  // ms based time
-float duty_cycle = 0.8f;
 int step = 0;
 
 // Global variable for boot time
@@ -209,7 +208,7 @@ void print_relative_time(const char* message, float duty_cycle, float target, fl
            ticks);
 }
 
-void printState(float v, float w, RobotState state, RobotOdometry odometry)
+void printState(float v, float w, RobotState state, RobotOdometry odometry, int32_t ticks_left, int32_t ticks_right)
 {
     absolute_time_t now = get_absolute_time();
     int64_t us_since_boot = absolute_time_diff_us(boot_time, now);
@@ -222,14 +221,15 @@ void printState(float v, float w, RobotState state, RobotOdometry odometry)
     printf(
             // diff setpoint,wheel setpoint, speed
             //"%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n\r",
-            "[%02d:%02d:%02d.%02d] %f,%f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n\r",
+            "[%02d:%02d:%02d.%02d] V: %f, W: %f, Req_S_L: %.3f, Req_S_R: %.3f, Curr_S_L: %.3f, Curr_S_R: %.3f, Eff_S_L: %.3f, Eff_S_R: %.3f, X: %.3f, Y: %.3f, θ: %.3f, V: %.3f, W: %.3f, Ticks_L: %d, Ticks_R: %d, Tick_diff: %d\n\r",
             hours, minutes, seconds, hundredths,
             v,w,
             state.l_ref_speed, state.r_ref_speed,
             state.l_speed, state.r_speed, 
             state.l_effort, state.r_effort,
             odometry.x_pos, odometry.y_pos, 
-            odometry.theta, odometry.v, odometry.w
+            odometry.theta, odometry.v, odometry.w,
+            ticks_left, ticks_right, ticks_right-ticks_left
             );
 }
 
@@ -254,7 +254,7 @@ int main() {
             sleep_ms(1500);
         }
     }
-    linear = -0.1f;
+    linear = -0.05f;
     bool isIncrease = false;
     absolute_time_t last_print_time = get_absolute_time();
     while (true) {
@@ -265,7 +265,7 @@ int main() {
             absolute_time_t now = get_absolute_time();
             if (absolute_time_diff_us(last_print_time, now) >= print_interval_ms * 1000) {
                 last_print_time = now;
-                printState(linear, angular, robot.getState(), robot.getOdometry());
+                printState(linear, angular, robot.getState(), robot.getOdometry(),encoder1_ticks, encoder2_ticks);
             }
         }
     }
