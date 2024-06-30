@@ -1,9 +1,11 @@
 #include "pid.h"
+#include <cstdio>
 
 // PID 클래스 생성자 정의
-PID::PID(float kp, float ki, float kd, float integral_limit = 0.5f, float output_limit = 1.0f) 
-: _kp(kp), _ki(ki), _kd(kd), _prev_error(0), _integral(0), _integral_limit(integral_limit), _output_limit(output_limit) 
+PID::PID(float kp, float ki, float kd, float integral_limit, float output_min_limit, float output_max_limit) 
+: _kp(kp), _ki(ki), _kd(kd), _prev_error(0), _integral(0), _integral_limit(integral_limit), _output_min_limit(output_min_limit), _output_max_limit(output_max_limit) 
 {
+    
 }
 
 // Calculate output with PID compute.
@@ -23,8 +25,9 @@ float PID::calculate(float setpoint, float measured_value, float deltaT) {
     float output = _kp * error + _ki * _integral + _kd * derivative;
     
     // Output clamping
-    if (output > _output_limit) output = _output_limit;
-    else if (output < -_output_limit) output = -_output_limit;
+    if (output > _output_max_limit) output = _output_max_limit;
+    else if (output < _output_min_limit) output = _output_min_limit;
     
+    //printf("output_min_limit : %f, output_max_limit: %f\r\n", _output_min_limit, _output_max_limit);
     return output;
 }

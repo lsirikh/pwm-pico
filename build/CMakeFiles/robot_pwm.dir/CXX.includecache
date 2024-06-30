@@ -7,10 +7,6 @@
 #IncludeRegexTransform: 
 
 ../include/config.h
-pico/stdlib.h
-../include/pico/stdlib.h
-math.h
-../include/math.h
 
 ../include/motor_control.h
 pico/stdlib.h
@@ -25,6 +21,20 @@ hardware/pwm.h
 ../include/pid.h
 
 ../include/pins.h
+
+../include/robot.h
+pico/stdlib.h
+../include/pico/stdlib.h
+cstdio
+-
+config.h
+../include/config.h
+pins.h
+../include/pins.h
+pid.h
+../include/pid.h
+motor_control.h
+../include/motor_control.h
 
 /home/ubuntu/pico/pico-sdk/src/boards/include/boards/pico.h
 
@@ -239,6 +249,8 @@ config.h
 /home/ubuntu/pico/pwm-pico/config.h
 pid.h
 /home/ubuntu/pico/pwm-pico/pid.h
+robot.h
+/home/ubuntu/pico/pwm-pico/robot.h
 cstdio
 -
 
