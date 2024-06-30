@@ -3,6 +3,8 @@
 #include "pins.h"
 #include "config.h"
 #include "pid.h" 
+#include "robot.h"
+
 #include <cstdio>
 
 #define UART_ID uart0
@@ -22,13 +24,39 @@ volatile uint32_t encoder1_state;
 volatile int32_t encoder2_ticks = 0;
 volatile uint32_t encoder2_state;
 
-// Define the motors
-DCMotor left_motor(M1_ENA_PIN, M1_ENB_PIN, M1_PWM_PIN, L_MOTOR_MIN_SPEED, L_MOTOR_MAX_SPEED);
-DCMotor right_motor(M2_ENA_PIN, M2_ENB_PIN, M2_PWM_PIN, R_MOTOR_MIN_SPEED, R_MOTOR_MAX_SPEED);
 
-// Define PID controllers
-PID left_pid(1.0, 0.01, 0.00, 0.5f, L_MOTOR_MAX_SPEED);  // Relative Slow
-PID right_pid(1.085, 0.01, 0.00, 0.5f, R_MOTOR_MAX_SPEED); // More Fast
+RobotPins robot_pins = {
+        {
+                M1_PWM_PIN,
+                M1_ENA_PIN,
+                M1_ENB_PIN
+        },{
+                M2_PWM_PIN,
+                M2_ENA_PIN,
+                M2_ENB_PIN
+        }
+};
+
+// // Define the motors
+// DCMotor left_motor(M1_ENA_PIN, M1_ENB_PIN, M1_PWM_PIN, L_MOTOR_MIN_SPEED, L_MOTOR_MAX_SPEED);
+// DCMotor right_motor(M2_ENA_PIN, M2_ENB_PIN, M2_PWM_PIN, R_MOTOR_MIN_SPEED, R_MOTOR_MAX_SPEED);
+
+// // Define PID controllers
+// // PID left_pid(1.0, 0.01, 0.00, 0.5f, L_MOTOR_MAX_SPEED);  // Relative Slow
+// // PID right_pid(1.085, 0.01, 0.00, 0.5f, R_MOTOR_MAX_SPEED); // More Fast
+// PID left_pid(1.0, 0.01, 0.00, 0.5f, L_MOTOR_MIN_SPEED, L_MOTOR_MAX_SPEED);  // Relative Slow
+// PID right_pid(1.0, 0.01, 0.00, 0.5f, L_MOTOR_MIN_SPEED, L_MOTOR_MAX_SPEED); // More Fast
+
+//Robot class 생성
+Robot robot(
+        0.1, 0.001, 0.00,
+        LED_PIN,
+        robot_pins
+        );
+
+
+float linear = 0.0;
+float angular = 0;
 
 absolute_time_t prev_time;
 int32_t prev_encoder1_ticks = 0;
@@ -43,11 +71,11 @@ int step = 0;
 // Global variable for boot time
 absolute_time_t boot_time;
 
-// Low-pass filter variables
-float v1Filt = 0;
-float v1Prev = 0;
-float v2Filt = 0;
-float v2Prev = 0;
+// // Low-pass filter variables
+// float v1Filt = 0;
+// float v1Prev = 0;
+// float v2Filt = 0;
+// float v2Prev = 0;
 
 // encoder interrupt callback
 void gpio_callback(uint gpio, uint32_t events)
@@ -143,17 +171,6 @@ void setup() {
     boot_time = get_absolute_time();
 }
 
-// Function to calculate RPM from encoder ticks
-float calculate_rpm(int32_t ticks, float deltaT) {
-    return (ticks / ROBOT_MOTOR_PPR) * (60.0f / deltaT);
-}
-
-// Function to calculate linear speed (m/s) from RPM
-float calculate_speed(float rpm) {
-    float wheel_circumference = 2 * M_PI * ROBOT_WHEEL_RADIUS;
-    return (rpm / 60.0f) * wheel_circumference;
-}
-
 //print_relative_time("Status Update", duty_cycle, left_pid.get_rpm(), right_pid.get_rpm(), left_pid.get_speed(), right_pid.get_speed(), encoder1_ticks, encoder2_ticks);
 // Function to print the current relative time in HH:mm:ss.ff format
 void print_relative_time(const char* message, float duty_cycle, float target_left, float target_right, float rpm_left, float rpm_right, float speed_left, float speed_right, int32_t ticks_left, int32_t ticks_right) {
@@ -192,73 +209,34 @@ void print_relative_time(const char* message, float duty_cycle, float target, fl
            ticks);
 }
 
-float adjust_motor_speed_based_on_ticks(int32_t left_ticks, int32_t right_ticks, float base_speed) {
-    int32_t tick_diff = left_ticks - right_ticks;
-    float adjustment = 0.0f;
+void printState(float v, float w, RobotState state, RobotOdometry odometry)
+{
+    absolute_time_t now = get_absolute_time();
+    int64_t us_since_boot = absolute_time_diff_us(boot_time, now);
     
-    if (abs(tick_diff) > 100) {
-        adjustment = tick_diff * 0.001f; // Adjust this factor as needed
-    }
-    
-    return base_speed + adjustment;
+    int hours = us_since_boot / 1000000 / 3600;
+    int minutes = (us_since_boot / 1000000 / 60) % 60;
+    int seconds = (us_since_boot / 1000000) % 60;
+    int hundredths = (us_since_boot / 10000) % 100;
+
+    printf(
+            // diff setpoint,wheel setpoint, speed
+            //"%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n\r",
+            "[%02d:%02d:%02d.%02d] %f,%f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n\r",
+            hours, minutes, seconds, hundredths,
+            v,w,
+            state.l_ref_speed, state.r_ref_speed,
+            state.l_speed, state.r_speed, 
+            state.l_effort, state.r_effort,
+            odometry.x_pos, odometry.y_pos, 
+            odometry.theta, odometry.v, odometry.w
+            );
 }
 
 
 bool timerCallback(repeating_timer_t *rt) {
-    // Calculate deltaT
-    absolute_time_t current_time = get_absolute_time();
-    float deltaT = absolute_time_diff_us(prev_time, current_time) / 1e6;
-    prev_time = current_time;
-
-    // Calculate RPM and speed
-    int32_t current_encoder1_ticks = encoder1_ticks;
-    int32_t current_encoder2_ticks = encoder2_ticks;
-
-    float rpm_left = calculate_rpm(current_encoder1_ticks - prev_encoder1_ticks, deltaT);
-    float rpm_right = calculate_rpm(current_encoder2_ticks - prev_encoder2_ticks, deltaT);
-
-    float speed_left = calculate_speed(rpm_left);
-    float speed_right = calculate_speed(rpm_right);
-
-    // // Low-pass filter (25 Hz cutoff)
-    // v1Filt = 0.854 * v1Filt + 0.0728 * rpm_left + 0.0728 * v1Prev;
-    // v1Prev = rpm_left;
-    // v2Filt = 0.854 * v2Filt + 0.0728 * rpm_right + 0.0728 * v2Prev;
-    // v2Prev = rpm_right;
-
-    // // Low-pass filter (50 Hz cutoff)
-    // v1Filt = 0.933 * v1Filt + 0.0335 * rpm_left + 0.0335 * v1Prev;
-    // v1Prev = rpm_left;
-    // v2Filt = 0.933 * v2Filt + 0.0335 * rpm_right + 0.0335 * v2Prev;
-    // v2Prev = rpm_right;
-
-    // Update previous tick counts
-    prev_encoder1_ticks = current_encoder1_ticks;
-    prev_encoder2_ticks = current_encoder2_ticks;
-
-    // Calculate control effort using PID
-    float control_left = left_pid.calculate(duty_cycle, speed_left, deltaT);
-    float control_right = right_pid.calculate(duty_cycle, speed_right, deltaT);
-
-    //float control_left = left_pid.calculate(duty_cycle, v1Filt, deltaT);
-    //float control_right = right_pid.calculate(duty_cycle, v2Filt, deltaT);
-
-    // Adjust right motor speed based on tick difference
-    control_right = adjust_motor_speed_based_on_ticks(encoder1_ticks, encoder2_ticks, control_right);
-
-
-
-    // Apply control effort
-    left_motor.write(control_left);
-    right_motor.write(control_right);
-
-    // Update RPM and speed in PID controllers for logging
-    left_pid.set_target(control_left);
-    right_pid.set_target(control_right);
-    left_pid.set_rpm(rpm_left);
-    right_pid.set_rpm(rpm_right);
-    left_pid.set_speed(speed_left);
-    right_pid.set_speed(speed_right);
+    robot.setUnicycle(linear, angular);
+    robot.updatePid(encoder1_ticks, encoder2_ticks);
 
     timer_flag = true;
     return true;
@@ -276,6 +254,7 @@ int main() {
             sleep_ms(1500);
         }
     }
+    linear = -0.1f;
     bool isIncrease = false;
     absolute_time_t last_print_time = get_absolute_time();
     while (true) {
@@ -285,53 +264,8 @@ int main() {
             // Print the status every 1 second
             absolute_time_t now = get_absolute_time();
             if (absolute_time_diff_us(last_print_time, now) >= print_interval_ms * 1000) {
-                print_relative_time("Status Update", duty_cycle, 
-                left_pid.get_target(), right_pid.get_target(), 
-                left_pid.get_rpm(), right_pid.get_rpm(), 
-                left_pid.get_speed(), right_pid.get_speed(), 
-                encoder1_ticks, encoder2_ticks);
-
-                // print_relative_time("Status Update", duty_cycle, 
-                // left_pid.get_target(), 
-                // left_pid.get_rpm(), 
-                // left_pid.get_speed(), 
-                // encoder1_ticks);
-
                 last_print_time = now;
-
-                // Adjust duty cycle every 5 seconds
-                // if (++step == 5) {
-                //     duty_cycle += 0.1f;
-                //     step = 0;
-
-                //     if (duty_cycle > 1.5f) {
-                //         duty_cycle = 0.4f;
-                //     }
-                // }
-
-                if (++step == 10) {
-                    step = 0;
-
-                    if(!isIncrease) {
-                        duty_cycle -= 0.1f;
-                        // duty_cycle이 감소하는 구간
-                        if(duty_cycle <= 0.3f && duty_cycle > 0.2f) {
-                            duty_cycle = -0.3f; // 0.3 구간을 통과하려고 0.4에서 0.3이 되면 -0.3으로 변경
-                        }
-                    } else {
-                        duty_cycle += 0.1f;
-                        // duty_cycle이 증가하는 구간
-                        if(duty_cycle >= -0.3f && duty_cycle < -0.2f) {
-                            duty_cycle = 0.3f; // -0.3 구간을 통과하려고 -0.3인 경우 0.3으로 변경
-                        }
-                    }
-
-                    if (duty_cycle >= 1.0f) {
-                        isIncrease = false;
-                    } else if (duty_cycle <= -1.0f) {
-                        isIncrease = true;
-                    }
-                }
+                printState(linear, angular, robot.getState(), robot.getOdometry());
             }
         }
     }

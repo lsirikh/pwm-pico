@@ -2276,6 +2276,7 @@ CMakeFiles/robot_pwm.dir/main.cpp.obj
  ../include/motor_control.h
  ../include/pid.h
  ../include/pins.h
+ ../include/robot.h
  /home/ubuntu/pico/pico-sdk/src/boards/include/boards/pico.h
  /home/ubuntu/pico/pico-sdk/src/common/pico_base/include/pico.h
  /home/ubuntu/pico/pico-sdk/src/common/pico_base/include/pico/assert.h
@@ -2359,3 +2360,48 @@ CMakeFiles/robot_pwm.dir/src/motor_control.cpp.obj
 CMakeFiles/robot_pwm.dir/src/pid.cpp.obj
  ../include/pid.h
  /home/ubuntu/pico/pwm-pico/src/pid.cpp
+CMakeFiles/robot_pwm.dir/src/robot.cpp.obj
+ ../include/config.h
+ ../include/motor_control.h
+ ../include/pid.h
+ ../include/pins.h
+ ../include/robot.h
+ /home/ubuntu/pico/pico-sdk/src/boards/include/boards/pico.h
+ /home/ubuntu/pico/pico-sdk/src/common/pico_base/include/pico.h
+ /home/ubuntu/pico/pico-sdk/src/common/pico_base/include/pico/assert.h
+ /home/ubuntu/pico/pico-sdk/src/common/pico_base/include/pico/config.h
+ /home/ubuntu/pico/pico-sdk/src/common/pico_base/include/pico/error.h
+ /home/ubuntu/pico/pico-sdk/src/common/pico_base/include/pico/types.h
+ /home/ubuntu/pico/pico-sdk/src/common/pico_stdlib/include/pico/stdlib.h
+ /home/ubuntu/pico/pico-sdk/src/common/pico_time/include/pico/time.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/platform_defs.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/addressmap.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/dreq.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/intctrl.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/io_bank0.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/m0plus.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/pads_bank0.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/pwm.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/sio.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/timer.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_regs/include/hardware/regs/uart.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_structs/include/hardware/structs/interp.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_structs/include/hardware/structs/iobank0.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_structs/include/hardware/structs/padsbank0.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_structs/include/hardware/structs/pwm.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_structs/include/hardware/structs/sio.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_structs/include/hardware/structs/timer.h
+ /home/ubuntu/pico/pico-sdk/src/rp2040/hardware_structs/include/hardware/structs/uart.h
+ /home/ubuntu/pico/pico-sdk/src/rp2_common/cmsis/include/cmsis/rename_exceptions.h
+ /home/ubuntu/pico/pico-sdk/src/rp2_common/hardware_base/include/hardware/address_mapped.h
+ /home/ubuntu/pico/pico-sdk/src/rp2_common/hardware_gpio/include/hardware/gpio.h
+ /home/ubuntu/pico/pico-sdk/src/rp2_common/hardware_irq/include/hardware/irq.h
+ /home/ubuntu/pico/pico-sdk/src/rp2_common/hardware_pwm/include/hardware/pwm.h
+ /home/ubuntu/pico/pico-sdk/src/rp2_common/hardware_timer/include/hardware/timer.h
+ /home/ubuntu/pico/pico-sdk/src/rp2_common/hardware_uart/include/hardware/uart.h
+ /home/ubuntu/pico/pico-sdk/src/rp2_common/pico_platform/include/pico/platform.h
+ /home/ubuntu/pico/pico-sdk/src/rp2_common/pico_stdio/include/pico/stdio.h
+ /home/ubuntu/pico/pico-sdk/src/rp2_common/pico_stdio_usb/include/pico/stdio_usb.h
+ /home/ubuntu/pico/pwm-pico/src/robot.cpp
+ generated/pico_base/pico/config_autogen.h
+ generated/pico_base/pico/version.h

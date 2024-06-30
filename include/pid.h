@@ -1,13 +1,12 @@
 #ifndef ROBOT_PWM_PID_H
 #define ROBOT_PWM_PID_H
 
+
 class PID {
 public:
-    PID(float kp, float ki, float kd, float integral_limit, float output_limit);
-    //: _kp(kp), _ki(ki), _kd(kd), _prev_error(0), _integral(0), _integral_limit(integral_limit), _output_limit(output_limit) {}
+    PID(float kp, float ki, float kd, float integral_limit, float output_min_limit, float output_max_limit);
 
     float calculate(float setpoint, float measured_value, float deltaT);
-
     float get_rpm() const { return _rpm; }
     float get_speed() const { return _speed; }
     float get_target() const { return _target; }
@@ -20,7 +19,8 @@ private:
     float _prev_error;
     float _integral;
     float _integral_limit;
-    float _output_limit;
+    float _output_min_limit;
+    float _output_max_limit;
 
     float _rpm;
     float _speed;
