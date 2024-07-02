@@ -192,15 +192,19 @@ void print_relative_time(const char* message, float duty_cycle, float target, fl
            ticks);
 }
 
-float adjust_motor_speed_based_on_ticks(int32_t left_ticks, int32_t right_ticks, float base_speed) {
+void adjust_motor_speed_based_on_ticks(int32_t tick_base, int32_t left_ticks, int32_t right_ticks, float* left_speed, float* right_speed) {
     int32_t tick_diff = left_ticks - right_ticks;
     float adjustment = 0.0f;
-    
-    if (abs(tick_diff) > 100) {
+
+    if (tick_diff > tick_base) {
         adjustment = tick_diff * 0.001f; // Adjust this factor as needed
+        *left_speed -= adjustment;
+        *right_speed += adjustment;
+    } else if (tick_diff < -tick_base) {
+        adjustment = -tick_diff * 0.001f; // Adjust this factor as needed
+        *left_speed += adjustment;
+        *right_speed -= adjustment;
     }
-    
-    return base_speed + adjustment;
 }
 
 
@@ -244,7 +248,7 @@ bool timerCallback(repeating_timer_t *rt) {
     //float control_right = right_pid.calculate(duty_cycle, v2Filt, deltaT);
 
     // Adjust right motor speed based on tick difference
-    control_right = adjust_motor_speed_based_on_ticks(encoder1_ticks, encoder2_ticks, control_right);
+    adjust_motor_speed_based_on_ticks(50, encoder1_ticks, encoder2_ticks, &control_left, &control_right);
 
 
 
@@ -299,39 +303,31 @@ int main() {
 
                 last_print_time = now;
 
-                // Adjust duty cycle every 5 seconds
-                // if (++step == 5) {
-                //     duty_cycle += 0.1f;
+                // if (++step == 10) {
                 //     step = 0;
 
-                //     if (duty_cycle > 1.5f) {
-                //         duty_cycle = 0.4f;
+                //     if(!isIncrease) {
+                //         duty_cycle -= 0.1f;
+                //         // duty_cycle이 감소하는 구간
+                //         if(duty_cycle <= 0.3f && duty_cycle > 0.2f) {
+                //             duty_cycle = -0.3f; // 0.3 구간을 통과하려고 0.4에서 0.3이 되면 -0.3으로 변경
+                //         }
+                //     } else {
+                //         duty_cycle += 0.1f;
+                //         // duty_cycle이 증가하는 구간
+                //         if(duty_cycle >= -0.3f && duty_cycle < -0.2f) {
+                //             duty_cycle = 0.3f; // -0.3 구간을 통과하려고 -0.3인 경우 0.3으로 변경
+                //         }
+                //     }
+
+                //     if (duty_cycle >= 1.0f) {
+                //         isIncrease = false;
+                //     } else if (duty_cycle <= -1.0f) {
+                //         isIncrease = true;
                 //     }
                 // }
 
-                if (++step == 10) {
-                    step = 0;
 
-                    if(!isIncrease) {
-                        duty_cycle -= 0.1f;
-                        // duty_cycle이 감소하는 구간
-                        if(duty_cycle <= 0.3f && duty_cycle > 0.2f) {
-                            duty_cycle = -0.3f; // 0.3 구간을 통과하려고 0.4에서 0.3이 되면 -0.3으로 변경
-                        }
-                    } else {
-                        duty_cycle += 0.1f;
-                        // duty_cycle이 증가하는 구간
-                        if(duty_cycle >= -0.3f && duty_cycle < -0.2f) {
-                            duty_cycle = 0.3f; // -0.3 구간을 통과하려고 -0.3인 경우 0.3으로 변경
-                        }
-                    }
-
-                    if (duty_cycle >= 1.0f) {
-                        isIncrease = false;
-                    } else if (duty_cycle <= -1.0f) {
-                        isIncrease = true;
-                    }
-                }
             }
         }
     }
