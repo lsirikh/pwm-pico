@@ -9,11 +9,12 @@
 // Define PWM resolution
 #define TOP 4095
 #define SYSTEM_CLOCK 125000000  // 125 MHz
-#define PWM_FREQUENCY 19500  // 20 kHz
+#define PWM_FREQUENCY 20000  // 20 kHz
 
 class DCMotor {
 public:
-    DCMotor(uint enA_pin, uint enB_pin, uint pwm_pin, float min_duty, float max_duty);
+    //DCMotor(uint enA_pin, uint enB_pin, uint pwm_pin, float min_duty, float max_duty);
+    DCMotor(uint dir_pin, uint pwm_pin, bool is_reversed, float min_duty, float max_duty);
 
     void set_pwm_frequency(float frequency);
     void write_int16(int16_t pwm);
@@ -25,8 +26,10 @@ public:
     void set_speed(float speed) { _speed = speed; }
 
 private:
-    uint _enA_pin;
-    uint _enB_pin;
+    //uint _enA_pin;
+    //uint _enB_pin;
+    bool _is_reversed;
+    uint _dir_pin;
     uint _pwm_pin;
     uint _slice_num;
     uint _channel;

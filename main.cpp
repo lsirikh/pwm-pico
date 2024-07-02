@@ -23,12 +23,14 @@ volatile int32_t encoder2_ticks = 0;
 volatile uint32_t encoder2_state;
 
 // Define the motors
-DCMotor left_motor(M1_ENA_PIN, M1_ENB_PIN, M1_PWM_PIN, L_MOTOR_MIN_SPEED, L_MOTOR_MAX_SPEED);
-DCMotor right_motor(M2_ENA_PIN, M2_ENB_PIN, M2_PWM_PIN, R_MOTOR_MIN_SPEED, R_MOTOR_MAX_SPEED);
+// DCMotor left_motor(M1_ENA_PIN, M1_ENB_PIN, M1_PWM_PIN, L_MOTOR_MIN_SPEED, L_MOTOR_MAX_SPEED);
+// DCMotor right_motor(M2_ENA_PIN, M2_ENB_PIN, M2_PWM_PIN, R_MOTOR_MIN_SPEED, R_MOTOR_MAX_SPEED);
+DCMotor left_motor(M1_DIR_PIN, M1_PWM_PIN, M1_ENC_INVERTED, L_MOTOR_MIN_SPEED, L_MOTOR_MAX_SPEED);
+DCMotor right_motor(M2_DIR_PIN, M2_PWM_PIN, M2_ENC_INVERTED, R_MOTOR_MIN_SPEED, R_MOTOR_MAX_SPEED);
 
 // Define PID controllers
 PID left_pid(1.0, 0.01, 0.00, 0.5f, L_MOTOR_MAX_SPEED);  // Relative Slow
-PID right_pid(1.085, 0.01, 0.00, 0.5f, R_MOTOR_MAX_SPEED); // More Fast
+PID right_pid(1.0, 0.01, 0.00, 0.5f, R_MOTOR_MAX_SPEED); // More Fast
 
 absolute_time_t prev_time;
 int32_t prev_encoder1_ticks = 0;
@@ -37,7 +39,7 @@ volatile bool timer_flag = false;
 
 const int sample_time_ms = 20;
 const int print_interval_ms = 200;  // ms based time
-float duty_cycle = 0.8f;
+float duty_cycle = 0.3f;
 int step = 0;
 
 // Global variable for boot time
@@ -63,7 +65,6 @@ void gpio_callback(uint gpio, uint32_t events)
     // GPIO 12, Event 8 : 11
     // GPIO 13, Event 4 : 01
 
-
     int32_t change1 = 0;
     int32_t change2 = 0;
     uint32_t new_state1 = ((gpio_get_all() & encoder1_mask) >> (M1_ENC_B_PIN > M1_ENC_A_PIN ? M1_ENC_A_PIN : M1_ENC_B_PIN)) & 0x3;
@@ -72,10 +73,8 @@ void gpio_callback(uint gpio, uint32_t events)
     //printf("gpio : %d, events : %d, new_state1: %u, encoder1_state: %u, new_state2: %u, encoder2_state: %u\r\n", gpio, events, new_state1, encoder1_state, new_state2, encoder2_state);
 
     if((new_state1 != encoder1_state) 
-    && ((new_state1 ^ encoder1_state) != INVALID_MASK)
-    )
+    && ((new_state1 ^ encoder1_state) != INVALID_MASK))
     {
-
         change1 = (encoder1_state & PREV_MASK) ^ ((new_state1 & CURR_MASK) >> 1);
         if(change1 == 0)
         {
@@ -89,8 +88,7 @@ void gpio_callback(uint gpio, uint32_t events)
     }
 
     if((new_state2 != encoder2_state) 
-    && ((new_state2 ^ encoder2_state) != INVALID_MASK)
-    )
+    && ((new_state2 ^ encoder2_state) != INVALID_MASK))
     {
         change2 = (encoder2_state & PREV_MASK) ^ ((new_state2 & CURR_MASK) >> 1);
         if(change2 == 0)
@@ -102,7 +100,6 @@ void gpio_callback(uint gpio, uint32_t events)
         if(M2_ENC_INVERTED) change2 = -change2;
         encoder2_ticks += change2;
         //printf("xor: %u, change2 : %d\r\n", (new_state2 ^ encoder2_state), change2);
-
     }
     encoder1_state = new_state1;
     encoder2_state = new_state2;
@@ -138,7 +135,6 @@ void setup() {
 
     encoder1_state = ((gpio_get_all() & encoder1_mask) >> (M1_ENC_A_PIN < M1_ENC_B_PIN ? M1_ENC_A_PIN : M1_ENC_B_PIN)) & 0x3;
     encoder2_state = ((gpio_get_all() & encoder2_mask) >> (M2_ENC_A_PIN < M2_ENC_B_PIN ? M2_ENC_A_PIN : M2_ENC_B_PIN)) & 0x3;
-
 
     boot_time = get_absolute_time();
 }
@@ -250,8 +246,6 @@ bool timerCallback(repeating_timer_t *rt) {
     // Adjust right motor speed based on tick difference
     adjust_motor_speed_based_on_ticks(50, encoder1_ticks, encoder2_ticks, &control_left, &control_right);
 
-
-
     // Apply control effort
     left_motor.write(control_left);
     right_motor.write(control_right);
@@ -303,29 +297,29 @@ int main() {
 
                 last_print_time = now;
 
-                // if (++step == 10) {
-                //     step = 0;
+                if (++step == 10) {
+                    step = 0;
 
-                //     if(!isIncrease) {
-                //         duty_cycle -= 0.1f;
-                //         // duty_cycle이 감소하는 구간
-                //         if(duty_cycle <= 0.3f && duty_cycle > 0.2f) {
-                //             duty_cycle = -0.3f; // 0.3 구간을 통과하려고 0.4에서 0.3이 되면 -0.3으로 변경
-                //         }
-                //     } else {
-                //         duty_cycle += 0.1f;
-                //         // duty_cycle이 증가하는 구간
-                //         if(duty_cycle >= -0.3f && duty_cycle < -0.2f) {
-                //             duty_cycle = 0.3f; // -0.3 구간을 통과하려고 -0.3인 경우 0.3으로 변경
-                //         }
-                //     }
+                    if(!isIncrease) {
+                        duty_cycle -= 0.1f;
+                        // duty_cycle이 감소하는 구간
+                        if(duty_cycle <= 0.2f && duty_cycle > 0.1f) {
+                            duty_cycle = -0.2f; // 0.3 구간을 통과하려고 0.4에서 0.3이 되면 -0.3으로 변경
+                        }
+                    } else {
+                        duty_cycle += 0.1f;
+                        // duty_cycle이 증가하는 구간
+                        if(duty_cycle >= -0.2f && duty_cycle < -0.2f) {
+                            duty_cycle = 0.2f; // -0.3 구간을 통과하려고 -0.3인 경우 0.3으로 변경
+                        }
+                    }
 
-                //     if (duty_cycle >= 1.0f) {
-                //         isIncrease = false;
-                //     } else if (duty_cycle <= -1.0f) {
-                //         isIncrease = true;
-                //     }
-                // }
+                    if (duty_cycle >= 1.0f) {
+                        isIncrease = false;
+                    } else if (duty_cycle <= -1.0f) {
+                        isIncrease = true;
+                    }
+                }
 
 
             }
