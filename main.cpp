@@ -29,8 +29,8 @@ DCMotor left_motor(M1_DIR_PIN, M1_PWM_PIN, M1_ENC_INVERTED, L_MOTOR_MIN_SPEED, L
 DCMotor right_motor(M2_DIR_PIN, M2_PWM_PIN, M2_ENC_INVERTED, R_MOTOR_MIN_SPEED, R_MOTOR_MAX_SPEED);
 
 // Define PID controllers
-PID left_pid(1.0, 0.01, 0.00, 0.5f, L_MOTOR_MAX_SPEED);  // Relative Slow
-PID right_pid(1.0, 0.01, 0.00, 0.5f, R_MOTOR_MAX_SPEED); // More Fast
+PID left_pid(0.8, 0.01, 0.0, 0.5f, L_MOTOR_MAX_SPEED);  // Relative Slow
+PID right_pid(0.8, 0.01, 0.0, 0.5f, R_MOTOR_MAX_SPEED); // More Fast
 
 absolute_time_t prev_time;
 int32_t prev_encoder1_ticks = 0;
@@ -220,31 +220,26 @@ bool timerCallback(repeating_timer_t *rt) {
     float speed_left = calculate_speed(rpm_left);
     float speed_right = calculate_speed(rpm_right);
 
-    // // Low-pass filter (25 Hz cutoff)
-    // v1Filt = 0.854 * v1Filt + 0.0728 * rpm_left + 0.0728 * v1Prev;
-    // v1Prev = rpm_left;
-    // v2Filt = 0.854 * v2Filt + 0.0728 * rpm_right + 0.0728 * v2Prev;
-    // v2Prev = rpm_right;
-
-    // // Low-pass filter (50 Hz cutoff)
-    // v1Filt = 0.933 * v1Filt + 0.0335 * rpm_left + 0.0335 * v1Prev;
-    // v1Prev = rpm_left;
-    // v2Filt = 0.933 * v2Filt + 0.0335 * rpm_right + 0.0335 * v2Prev;
-    // v2Prev = rpm_right;
-
     // Update previous tick counts
     prev_encoder1_ticks = current_encoder1_ticks;
     prev_encoder2_ticks = current_encoder2_ticks;
+
+    // Apply low-pass filter (25 Hz cutoff)
+    // float filter_coeff = 0.0728;
+    // float filter_const = 0.854;
+    // v1Filt = filter_const * v1Filt + filter_coeff * (rpm_left + v1Prev);
+    // v1Prev = rpm_left;
+    // v2Filt = filter_const * v2Filt + filter_coeff * (rpm_right + v2Prev);
+    // v2Prev = rpm_right;
+    // float control_left = left_pid.calculate(duty_cycle, v1Filt, deltaT);
+    // float control_right = right_pid.calculate(duty_cycle, v2Filt, deltaT);
 
     // Calculate control effort using PID
     float control_left = left_pid.calculate(duty_cycle, speed_left, deltaT);
     float control_right = right_pid.calculate(duty_cycle, speed_right, deltaT);
 
-    //float control_left = left_pid.calculate(duty_cycle, v1Filt, deltaT);
-    //float control_right = right_pid.calculate(duty_cycle, v2Filt, deltaT);
-
     // Adjust right motor speed based on tick difference
-    adjust_motor_speed_based_on_ticks(50, encoder1_ticks, encoder2_ticks, &control_left, &control_right);
+    //adjust_motor_speed_based_on_ticks(50, encoder1_ticks, encoder2_ticks, &control_left, &control_right);
 
     // Apply control effort
     left_motor.write(control_left);
