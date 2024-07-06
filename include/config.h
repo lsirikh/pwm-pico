@@ -42,8 +42,8 @@
 //축간거리
 #define ROBOT_WHEEL_SEPARATION 0.34f
 //Motor 직선 속도, Motor 각속도
-#define ROBOT_MAX_LINEAR_M_S 0.45
-#define ROBOT_MIN_LINEAR_M_S -0.45
+#define ROBOT_MAX_LINEAR_M_S 0.2
+#define ROBOT_MIN_LINEAR_M_S -0.2
 #define ROBOT_MAX_ANGULAR_R_S 2.0
 #define ROBOT_MIN_ANGULAR_R_S -2.0
 
