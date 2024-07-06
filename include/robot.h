@@ -12,9 +12,11 @@
 //모터 핀 정의 정보 구조체
 struct MotorPins
 {
-    uint pwm;
-    uint en_a;
-    uint en_b;
+    uint dir_pin;
+    uint pwm_pin;
+    bool is_reversed;
+    float min_duty;
+    float max_duty;
 };
 
 //로봇핀 구조체
@@ -54,9 +56,12 @@ struct RobotOdometry
 class Robot{
 public:
     Robot(
-            float kp,
-            float kd,
-            float ki,
+            float kp_l,
+            float kd_l,
+            float ki_l,
+            float kp_r,
+            float kd_r,
+            float ki_r,
             uint status_led_pin,
             RobotPins pins
             );
@@ -72,9 +77,12 @@ public:
     void adjust_motor_speed_based_on_ticks(int32_t tick_base, int32_t left_ticks, int32_t right_ticks, float* left_speed, float* right_speed);
 
 private:
-    float _kp;
-    float _kd;
-    float _ki;
+    float _kp_l;
+    float _kd_l;
+    float _ki_l;
+    float _kp_r;
+    float _kd_r;
+    float _ki_r;
     float _pid_rate;
     uint32_t _sample_time_ms;
     float _l_input;

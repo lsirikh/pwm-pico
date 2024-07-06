@@ -25,16 +25,10 @@ volatile int32_t encoder2_ticks = 0;
 volatile uint32_t encoder2_state;
 
 
-RobotPins robot_pins = {
-        {
-                M1_PWM_PIN,
-                M1_ENA_PIN,
-                M1_ENB_PIN
-        },{
-                M2_PWM_PIN,
-                M2_ENA_PIN,
-                M2_ENB_PIN
-        }
+RobotPins robot_pins = 
+{
+    {M1_DIR_PIN, M1_PWM_PIN, M1_ENC_INVERTED, L_MOTOR_MIN_SPEED, L_MOTOR_MAX_SPEED},
+    {M2_DIR_PIN, M2_PWM_PIN, M2_ENC_INVERTED, R_MOTOR_MIN_SPEED, R_MOTOR_MAX_SPEED}
 };
 
 // // Define the motors
@@ -49,13 +43,14 @@ RobotPins robot_pins = {
 
 //Robot class 생성
 Robot robot(
-        1.0, 0.001, 0.00,
-        LED_PIN,
-        robot_pins
-        );
+    0.1721, 0.0001, 0.0001,  // left motor PID constants
+    0.17, 0.0001, 0.0001,  // right motor PID constants
+    LED_PIN,            // status LED pin
+    robot_pins          // robot pins structure
+);
 
 
-float linear = 0.0;
+float linear = 0.22;
 float angular = 0;
 
 absolute_time_t prev_time;
@@ -63,7 +58,7 @@ int32_t prev_encoder1_ticks = 0;
 int32_t prev_encoder2_ticks = 0;
 volatile bool timer_flag = false;
 
-const int sample_time_ms = 20;
+const int sample_time_ms = 1;
 const int print_interval_ms = 200;  // ms based time
 int step = 0;
 
@@ -254,7 +249,6 @@ int main() {
             sleep_ms(1500);
         }
     }
-    linear = -0.05f;
     bool isIncrease = false;
     absolute_time_t last_print_time = get_absolute_time();
     while (true) {
