@@ -17,7 +17,7 @@ _kp_l(kp_l), _kd_l(kd_l), _ki_l(ki_l), _kp_r(kp_r), _kd_r(kd_r), _ki_r(ki_r), //
   _l_motor(pins.left.dir_pin, pins.left.pwm_pin, pins.left.is_reversed, pins.left.min_duty, pins.left.max_duty), // 왼쪽 모터 제어 객체 초기화
   _r_motor(pins.right.dir_pin, pins.right.pwm_pin, pins.right.is_reversed, pins.right.min_duty, pins.right.max_duty), // 오른쪽 모터 제어 객체 초기화
   _l_pid(kp_l, kd_l, ki_l, 0.5f, L_MOTOR_MIN_SPEED, L_MOTOR_MAX_SPEED), // 왼쪽 모터 PID 제어 객체 초기화
-  _r_pid(kp_r, ki_r, kd_r, 0.5f, R_MOTOR_MIN_SPEED, R_MOTOR_MAX_SPEED), // 오른쪽 모터 PID 제어 객체 초기화
+  _r_pid(kp_r, kd_r, ki_r, 0.5f, R_MOTOR_MIN_SPEED, R_MOTOR_MAX_SPEED), // 오른쪽 모터 PID 제어 객체 초기화
   _status_led_pin(status_led_pin) // 상태 LED 핀 초기화
 {
     _l_motor.write(0.0f); // 왼쪽 모터 초기 속도 설정
@@ -26,6 +26,7 @@ _kp_l(kp_l), _kd_l(kd_l), _ki_l(ki_l), _kp_r(kp_r), _kd_r(kd_r), _ki_r(ki_r), //
     _r_setpoint = 0; // 오른쪽 모터 목표 속도 초기화
     //_pid_rate = float(sample_time_ms) / 1000.0f; // PID 샘플링 시간을 초 단위로 변환
     initPins(); // 핀 초기화 함수 호출
+    last_print_time = get_absolute_time();
 }
 
 void Robot::adjust_motor_speed_based_on_ticks(int32_t tick_base, int32_t left_ticks, int32_t right_ticks, float* left_speed, float* right_speed) {
@@ -90,6 +91,12 @@ void Robot::updatePid(uint32_t l_encoder_ticks, uint32_t r_encoder_ticks)
     //adjust_motor_speed_based_on_ticks(50, l_encoder_ticks, r_encoder_ticks, &_state.l_effort, &_state.r_effort);
 
     // 모터 속도 제어
+    // absolute_time_t now = get_absolute_time();
+    // if (absolute_time_diff_us(last_print_time, now) >= print_interval_ms * 1000) {
+    //     last_print_time = now;
+    //     printf("left_motor: %f, right_motor: %f\n\r", _state.l_effort, _state.r_effort); // 디버깅을 위해 출력
+    // }
+
     _l_motor.write(_state.l_effort);
     _r_motor.write(_state.r_effort);
 

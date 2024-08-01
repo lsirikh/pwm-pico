@@ -27,8 +27,8 @@
 #define M1_ENC_A_PIN 10
 #define M1_ENC_B_PIN 11
 //두 번째 모터에 부착된 엔코더 인터럽트 핀(2채널)
-#define M2_ENC_A_PIN 12
-#define M2_ENC_B_PIN 13
+#define M2_ENC_A_PIN 13
+#define M2_ENC_B_PIN 12
 //true, false를 정의한 define
 //Not used define
 #define M1_ENC_INVERTED false

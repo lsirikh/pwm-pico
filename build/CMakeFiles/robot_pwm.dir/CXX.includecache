@@ -230,6 +230,12 @@ sys/cdefs.h
 pico/types.h
 /home/ubuntu/pico/pico-sdk/src/rp2_common/pico_platform/include/pico/pico/types.h
 
+/home/ubuntu/pico/pico-sdk/src/rp2_common/pico_standard_link/new_delete.cpp
+cstdlib
+-
+pico.h
+/home/ubuntu/pico/pico-sdk/src/rp2_common/pico_standard_link/pico.h
+
 /home/ubuntu/pico/pico-sdk/src/rp2_common/pico_stdio/include/pico/stdio.h
 pico.h
 /home/ubuntu/pico/pico-sdk/src/rp2_common/pico_stdio/include/pico/pico.h
@@ -253,6 +259,20 @@ robot.h
 /home/ubuntu/pico/pwm-pico/robot.h
 cstdio
 -
+
+/home/ubuntu/pico/pwm-pico/src/motor_control.cpp
+motor_control.h
+/home/ubuntu/pico/pwm-pico/src/motor_control.h
+
+/home/ubuntu/pico/pwm-pico/src/pid.cpp
+pid.h
+/home/ubuntu/pico/pwm-pico/src/pid.h
+cstdio
+-
+
+/home/ubuntu/pico/pwm-pico/src/robot.cpp
+robot.h
+/home/ubuntu/pico/pwm-pico/src/robot.h
 
 generated/pico_base/pico/config_autogen.h
 /home/ubuntu/pico/pico-sdk/src/boards/include/boards/pico.h
