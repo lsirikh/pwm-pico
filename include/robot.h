@@ -94,6 +94,12 @@ private:
     float _linear;
     float _angular;
     absolute_time_t _prev_time;
+    int print_interval_ms = 500; // 0.5초마다 출력
+    absolute_time_t last_print_time;
+
+    // Robot 클래스 내 멤버 변수로 이전 값 저장 변수 추가
+    float _previous_linear = 0.0f;
+    float _previous_angular = 0.0f;
 
     DCMotor _l_motor;
     DCMotor _r_motor;
