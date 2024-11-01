@@ -6,6 +6,7 @@
 #include "robot.h"
 
 #include <cstdio>
+#include <stdint.h>
 
 #define UART_ID uart0
 
@@ -27,8 +28,8 @@ volatile uint32_t encoder2_state;
 
 RobotPins robot_pins = 
 {
-    {M1_DIR_PIN, M1_PWM_PIN, M1_ENC_INVERTED, L_MOTOR_MIN_SPEED, L_MOTOR_MAX_SPEED},
-    {M2_DIR_PIN, M2_PWM_PIN, M2_ENC_INVERTED, R_MOTOR_MIN_SPEED, R_MOTOR_MAX_SPEED}
+    {M1_DIR_PIN, M1_PWM_PIN, false, L_MOTOR_MIN_SPEED, L_MOTOR_MAX_SPEED},  //left motor
+    {M2_DIR_PIN, M2_PWM_PIN, true, R_MOTOR_MIN_SPEED, R_MOTOR_MAX_SPEED}    //right motor
 };
 
 // // Define the motors
@@ -45,10 +46,19 @@ RobotPins robot_pins =
 char in_buffer[100];
 uint16_t char_idx = 0;
 
+// 0.17, 0.0001, 0.0001,  // left motor PID constants
+// 0.1712, 0.0001, 0.0001,  // right motor PID constants
+
+// 0.1, 0.0, 0.0,  // left motor PID constants
+// 0.082, 0.0, 0.0,  // right motor PID constants
+
+const int sample_time_ms = 20;
+
 //Robot class 생성
 Robot robot(
-    0.17, 0.01, 0.0001,  // left motor PID constants
-    0.1712, 0.01, 0.0001,  // right motor PID constants
+    0.1, 0.0, 0.0,  // left motor PID constants
+    0.1, 0.0, 0.0,  // right motor PID constants
+    sample_time_ms,
     LED_PIN,            // status LED pin
     robot_pins          // robot pins structure
 );
@@ -76,7 +86,7 @@ int32_t prev_encoder1_ticks = 0;
 int32_t prev_encoder2_ticks = 0;
 volatile bool timer_flag = false;
 
-const int sample_time_ms = 20;
+
 const int print_interval_ms = 500;  // ms based time
 absolute_time_t last_print_time = get_absolute_time();
 
@@ -124,7 +134,7 @@ void gpio_callback(uint gpio, uint32_t events)
         }
         if(M1_ENC_INVERTED) change1 = -1 * change1;
         encoder1_ticks -= change1;
-        // printf("GPIO: %d, Events: %d, Encoder1 Change: %d, New State: %u, Encoder1 Ticks: %d\r\n", gpio, events, change1, new_state1, encoder1_ticks);
+        //printf("GPIO: %d, Events: %d, Encoder1 Change: %d, New State: %u, Encoder1 Ticks: %d\r\n", gpio, events, change1, new_state1, encoder1_ticks);
     }
 
     if(((new_state2 ^ encoder2_state) != INVALID_MASK) && (new_state2 != encoder2_state))
@@ -140,10 +150,11 @@ void gpio_callback(uint gpio, uint32_t events)
         }
         if(M2_ENC_INVERTED) change2 = -1 * change2;
         encoder2_ticks -= change2;
-        // printf("GPIO: %d, Events: %d, Encoder2 Change: %d, New State: %u, Encoder2 Ticks: %d\r\n", gpio, events, change2, new_state2, encoder2_ticks);
+        //printf("GPIO: %d, Events: %d, Encoder2 Change: %d, New State: %u, Encoder2 Ticks: %d\r\n", gpio, events, change2, new_state2, encoder2_ticks);
     }
     encoder1_state = new_state1;
     encoder2_state = new_state2;
+    
     // absolute_time_t now = get_absolute_time();
     // if (absolute_time_diff_us(last_print_time, now) >= print_interval_ms * 1000) {
     //     last_print_time = now;
@@ -255,13 +266,45 @@ void printState(float v, float w, RobotState state, RobotOdometry odometry)
 {
     printf(
             // diff setpoint,wheel setpoint, speed
-            "%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n\r",
+            "%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d\n\r",
             state.l_ref_speed, state.r_ref_speed,
             state.l_speed, state.r_speed, 
             state.l_effort, state.r_effort,
             odometry.x_pos, odometry.y_pos, 
-            odometry.theta, odometry.v, odometry.w
+            odometry.theta, odometry.v, odometry.w,
+            encoder1_ticks, encoder2_ticks
             );
+}
+
+// CRC 계산 함수 추가
+uint16_t calculate_crc(const uint8_t *data, size_t length) {
+    uint16_t crc = 0xFFFF;
+    for (size_t i = 0; i < length; i++) {
+        crc ^= (uint16_t)data[i] << 8;
+        for (uint8_t j = 0; j < 8; j++) {
+            if (crc & 0x8000) {
+                crc = (crc << 1) ^ 0x1021;  // CRC-16-CCITT
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+    return crc;
+}
+
+void sendRos(float v, float w, RobotState state, RobotOdometry odometry)
+{
+    char buffer[80];
+    int length = snprintf(buffer, sizeof(buffer),
+        "%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f",
+        state.l_speed, state.r_speed, 
+        odometry.x_pos, odometry.y_pos, 
+        odometry.theta, odometry.v, odometry.w
+    );
+
+    // CRC 계산 및 추가
+    uint16_t crc = calculate_crc((const uint8_t *)buffer, length);
+    printf("%s,%04X", buffer, crc);  // 데이터 끝에 CRC 추가하여 전송
 }
 
 
@@ -274,82 +317,20 @@ bool timerCallback(repeating_timer_t *rt) {
 }
 
 bool timerStatusCallback(repeating_timer_t *rt) {
-    printf("encoder1_ticks: %d, encoder2_ticks: %d\n\r", encoder1_ticks, encoder2_ticks);
+    //rintf("encoder1_ticks: %d, encoder2_ticks: %d\n\r", encoder1_ticks, encoder2_ticks);
+    //printState(linear, angular, robot.getState(), robot.getOdometry());
+    sendRos(linear, angular, robot.getState(), robot.getOdometry());
     return true;
-}
-
-void controlLoop() {
-
-    absolute_time_t now = get_absolute_time();
-    if (absolute_time_diff_us(last_print_time, now) >= print_interval_ms * 1000) {
-        last_print_time = now;
-        switch (robot_state) {
-        case MOVE_FORWARD:
-            printf("[MOVE FORWARD]\t");
-            break;
-        case ROTATE:
-            printf("[ROTATE 90 Degree]\t");
-            break;
-        case STOP:
-            printf("[STOP]\t");
-            break;
-    }
-        printState(linear, angular, robot.getState(), robot.getOdometry(),encoder1_ticks, encoder2_ticks);
-    }
-
-    RobotOdometry odometry = robot.getOdometry();
-    float remaining_distance = sqrt(pow(odometry.x_pos - start_x, 2) + pow(odometry.y_pos - start_y, 2));
-    float remaining_angle = fabs(odometry.theta - start_theta);
-
-    switch (robot_state) {
-        case MOVE_FORWARD:
-            if (
-                //Slow move After Target Distance remain 10% off
-                (target_distance - target_distance * slow_zone_ratio) < remaining_distance && remaining_distance <= target_distance 
-                //Slow move Before remain Distance up to target distance multiply slow_zone ratio 
-                || remaining_distance <= target_distance * slow_zone_ratio) {
-                linear = 0.05; // Reduce speed to half (0.1 m/s / 2)
-            } else {
-                linear = 0.1; // 0.1 m/s
-            }
-            angular = 0.0; // no rotation
-
-            if (remaining_distance >= target_distance) {
-                linear = 0.0; // stop moving forward
-                robot_state = ROTATE;
-                start_x = odometry.x_pos;
-                start_y = odometry.y_pos;
-            }
-            break;
-
-        case ROTATE:
-            linear = 0.0; // no forward movement
-            if (
-                //Slow move After Target angle remain 10% off
-                (target_angle - target_angle * slow_zone_ratio) < remaining_angle && remaining_angle<= target_angle 
-                //Slow move Before remain angle up to target angle multiply slow_zone ratio 
-                || remaining_angle <= target_angle * slow_zone_ratio) {
-                angular = 0.5; // Reduce speed to half (1.0 rad/s / 2)
-            } else {
-                angular = 1.0; // start rotating
-            }
-            if (remaining_angle >= target_angle) {
-                angular = 0.0; // stop rotating
-                start_theta = odometry.theta;
-                robot_state = MOVE_FORWARD;
-            }
-            break;
-
-        case STOP:
-            linear = 0.0;
-            angular = 0.0;
-            break;
-    }
 }
 
 int main() {
     setup();
 
+    ///////////////////////////////////////////////////////////////////////////////
+    // When ROS2 let pico control with linear and angular as interoperative mode //
+    ///////////////////////////////////////////////////////////////////////////////
+
+    // 1. timer setup
     repeating_timer_t timer;
     if (!add_repeating_timer_ms(sample_time_ms, timerCallback, NULL, &timer)) {
         while (true) {
@@ -359,10 +340,9 @@ int main() {
             sleep_ms(1500);
         }
     }
-
-    // 상태 확인 및 디버깅 타이머 추가
+    
     // repeating_timer_t status_timer;
-    // if (!add_repeating_timer_ms(3000, timerStatusCallback, NULL, &status_timer))
+    // if (!add_repeating_timer_ms(print_interval_ms, timerStatusCallback, NULL, &status_timer))
     // {
     //     while (true) {
     //         gpio_put(LED_PIN, true);
@@ -371,21 +351,8 @@ int main() {
     //         sleep_ms(1500);
     //     }
     // }
-        
-    
-    // while (true) {
-    //     if (timer_flag) {
-    //         timer_flag = false;
-    //         controlLoop();
-    //         // Print the status every 1 second
-    //         // absolute_time_t now = get_absolute_time();
-    //         // if (absolute_time_diff_us(last_print_time, now) >= print_interval_ms * 1000) {
-    //         //     last_print_time = now;
-    //         //     printState(linear, angular, robot.getState(), robot.getOdometry(),encoder1_ticks, encoder2_ticks);
-    //         // }
-    //     }
-    // }
 
+    // 2. Received a message from uart serial
     int ch;
     int ch_idx = 0;  // ch_idx 초기화 추가
     int value1, value2;
@@ -400,7 +367,6 @@ int main() {
         while(ch != PICO_ERROR_TIMEOUT)
         {
             gpio_put(LED_PIN, true);
-            // printf(" %c ", ch);
             putchar(ch);
             in_buffer[ch_idx++] = ch;
             if(ch == '/')
@@ -408,7 +374,8 @@ int main() {
                 in_buffer[ch_idx] = 0;      // end of string
                 linear = strtof(in_buffer, &ch_ptr);
                 angular = strtof(ch_ptr+1, &ch_ptr2);
-                printState(linear, angular, robot.getState(), robot.getOdometry());
+                sendRos(linear, angular, robot.getState(), robot.getOdometry());
+                
                 ch_idx = 0;
                 break;
             }

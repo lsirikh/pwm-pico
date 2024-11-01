@@ -32,7 +32,7 @@ cmake .. && make && sudo mount /dev/sda1 /media/pico/ && sudo cp robot_pwm.uf2 /
 
 3. 해당 로직이 구현되면, 신호수집을 위한 ROS2 코드를 구성한다. 
 
-### v1.0
+### v1.0  
 1. 현재의 PID 세팅값은 아래와 같다.
 <P>
 ** 현재는 무부하시 1분간 전진을 할 경우 : 약 50 tick diff  <br>
@@ -43,3 +43,10 @@ cmake .. && make && sudo mount /dev/sda1 /media/pico/ && sudo cp robot_pwm.uf2 /
 
 2. 이제 시리얼로 Linearity를 제어하여 원격제어하는 로직구현되어 있다.
 3. 해당 로직이 구현되면, 신호수집을 위한 ROS2 코드가 구현되어 있다.  
+
+### v1.1  
+### Date: 2024-11-02
+1. CRC를 적용하여 데이터 전송에 안정성을 확보하였다.  
+2. USB Serial 데이터 통신에 불안정한 요소는 여전히 존재하나 물리적인 케이블 교체 및 Baudrate 변경을 통해 디버깅이 필요하다.  
+3. 새로 구매한 24V DC 모터(같은 모델)를 적용하여 PID 수정이 필요하다.  
+

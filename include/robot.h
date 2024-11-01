@@ -7,6 +7,7 @@
 #include "pins.h"
 #include "pid.h"
 #include "motor_control.h"
+#include "pid_controller.h"
 
 
 //모터 핀 정의 정보 구조체
@@ -56,12 +57,9 @@ struct RobotOdometry
 class Robot{
 public:
     Robot(
-            float kp_l,
-            float kd_l,
-            float ki_l,
-            float kp_r,
-            float kd_r,
-            float ki_r,
+            float kp_l, float kd_l, float ki_l,
+            float kp_r, float kd_r, float ki_r,
+            uint32_t sample_time_ms,
             uint status_led_pin,
             RobotPins pins
             );
@@ -105,6 +103,8 @@ private:
     DCMotor _r_motor;
     PID _l_pid;
     PID _r_pid;
+    // PID_Controller _l_pid;
+    // PID_Controller _r_pid;
     uint _status_led_pin;
     RobotState _state;
     RobotOdometry _odom;

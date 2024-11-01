@@ -9,13 +9,13 @@ DCMotor::DCMotor(uint dir_pin, uint pwm_pin, bool isReversed, float min_duty, fl
     _slice_num = pwm_gpio_to_slice_num(_pwm_pin);
     _channel = pwm_gpio_to_channel(_pwm_pin);
     gpio_set_function(_pwm_pin, GPIO_FUNC_PWM);
-
-    // pwm_set_wrap(_slice_num, TOP);
-
+    //pwm_set_wrap(_slice_num, TOP);
     // Set PWM frequency
     set_pwm_frequency(PWM_FREQUENCY);
-
     pwm_set_chan_level(_slice_num, _channel, 0);
+
+
+
 
     // Initialize GPIO
     // gpio_init(_enA_pin);
@@ -52,6 +52,8 @@ void DCMotor::write_int16(int16_t pwm)
             gpio_put(_dir_pin, false);
         else
             gpio_put(_dir_pin, true);
+
+        //printf("pwm <  0 - PIN : %d, PWM : %d\n\r", _dir_pin, pwm);
         pwm_set_chan_level(_slice_num, _channel, abs(pwm));
     } else
     {
@@ -61,6 +63,8 @@ void DCMotor::write_int16(int16_t pwm)
             gpio_put(_dir_pin, true);
         else
             gpio_put(_dir_pin, false);
+        
+        //printf("pwm >= 0 - PIN : %d, PWM : %d\n\r", _dir_pin, pwm);
         pwm_set_chan_level(_slice_num, _channel, pwm);
     }
     pwm_set_enabled(_slice_num, true);
