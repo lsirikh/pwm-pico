@@ -14,6 +14,9 @@ public:
     void set_speed(float speed) { _speed = speed; }
     void set_target(float target) {_target = target;}
 
+    // Set new PID constants
+    void setPIDConstants(float kp, float ki, float kd);
+
 private:
     float _kp, _ki, _kd;
     float _prev_error;

@@ -31,3 +31,10 @@ float PID::calculate(float setpoint, float measured_value, float deltaT) {
     //printf("output_min_limit : %f, output_max_limit: %f\r\n", _output_min_limit, _output_max_limit);
     return output;
 }
+
+// Update PID constants for the controller
+void PID::setPIDConstants(float kp, float ki, float kd) {
+    _kp = kp;
+    _ki = ki;
+    _kd = kd;
+}

@@ -54,10 +54,17 @@ uint16_t char_idx = 0;
 
 const int sample_time_ms = 20;
 
+// kp_l,0.109
+// ki_l,0.0014
+// kd_l,0.0001
+// kp_r,0.1
+// ki_r,0.0014
+// kd_r,0.0001
+
 //Robot class 생성
 Robot robot(
-    0.1, 0.0, 0.0,  // left motor PID constants
-    0.1, 0.0, 0.0,  // right motor PID constants
+    0.109, 0.0014, 0.0001,  // left motor PID constants
+    0.1, 0.0014, 0.0001,  // right motor PID constants
     sample_time_ms,
     LED_PIN,            // status LED pin
     robot_pins          // robot pins structure
@@ -317,7 +324,7 @@ bool timerCallback(repeating_timer_t *rt) {
 }
 
 bool timerStatusCallback(repeating_timer_t *rt) {
-    //rintf("encoder1_ticks: %d, encoder2_ticks: %d\n\r", encoder1_ticks, encoder2_ticks);
+    //printf("encoder1_ticks: %d, encoder2_ticks: %d\n\r", encoder1_ticks, encoder2_ticks);
     //printState(linear, angular, robot.getState(), robot.getOdometry());
     sendRos(linear, angular, robot.getState(), robot.getOdometry());
     return true;
@@ -369,13 +376,40 @@ int main() {
             gpio_put(LED_PIN, true);
             putchar(ch);
             in_buffer[ch_idx++] = ch;
-            if(ch == '/')
+            // Check for reset command `$`
+            if (ch == '$') {
+                // Reset variables to initial state
+                linear = 0.0;
+                angular = 0.0;
+                encoder1_ticks = 0;
+                encoder2_ticks = 0;
+                robot.clearPosition();
+                ch_idx = 0;  // Reset buffer index
+                printf("Reset command received, data initialized.\n");  // Debug message
+            } 
+            else if (ch == '!') 
+            {  
+                // PID 설정 명령어 감지
+                in_buffer[ch_idx] = 0;  // 문자열 종료
+                char* ch_ptr;
+                float kp_l = strtof(in_buffer + 1, &ch_ptr); // `!kp_l`
+                float ki_l = strtof(ch_ptr + 1, &ch_ptr);    // `ki_l`
+                float kd_l = strtof(ch_ptr + 1, &ch_ptr);    // `kd_l`
+                float kp_r = strtof(ch_ptr + 1, &ch_ptr);    // `kp_r`
+                float ki_r = strtof(ch_ptr + 1, &ch_ptr);    // `ki_r`
+                float kd_r = strtof(ch_ptr + 1, NULL);       // `kd_r`
+                
+                // 업데이트 적용
+                robot.updatePID(kp_l, ki_l, kd_l, kp_r, ki_r, kd_r);
+                ch_idx = 0;
+            } 
+            else if(ch == '/')
             {
                 in_buffer[ch_idx] = 0;      // end of string
                 linear = strtof(in_buffer, &ch_ptr);
                 angular = strtof(ch_ptr+1, &ch_ptr2);
                 sendRos(linear, angular, robot.getState(), robot.getOdometry());
-                
+                //printState(linear, angular, robot.getState(), robot.getOdometry(), encoder1_ticks, encoder2_ticks);
                 ch_idx = 0;
                 break;
             }

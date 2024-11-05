@@ -174,3 +174,14 @@ RobotState Robot::getState() {
 RobotOdometry Robot::getOdometry() {
     return _odom;
 }
+
+void Robot::clearPosition(){
+    _odom.x_pos = 0;
+    _odom.y_pos = 0;
+}
+
+// Update PID constants for left and right motors
+void Robot::updatePID(float kp_l, float kd_l, float ki_l, float kp_r, float kd_r, float ki_r) {
+    _l_pid.setPIDConstants(kp_l, ki_l, kd_l);  // Update left motor PID constant
+    _r_pid.setPIDConstants(kp_r, ki_r, kd_r);  // Update right motor PID constant
+}
