@@ -300,7 +300,6 @@ void sendRos(const RobotState& state, const RobotOdometry& odometry) {
     }
 }
 
-
 // bool receiveMessage(ControlMessage* msg) {
 //     uint8_t buffer[BUFFER_SIZE];
 //     size_t buffer_index = 0;
