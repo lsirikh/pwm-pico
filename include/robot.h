@@ -7,6 +7,7 @@
 #include "pins.h"
 #include "pid.h"
 #include "motor_control.h"
+//#include "pid_controller.h"
 
 
 //모터 핀 정의 정보 구조체
@@ -56,12 +57,9 @@ struct RobotOdometry
 class Robot{
 public:
     Robot(
-            float kp_l,
-            float kd_l,
-            float ki_l,
-            float kp_r,
-            float kd_r,
-            float ki_r,
+            float kp_l, float kd_l, float ki_l,
+            float kp_r, float kd_r, float ki_r,
+            uint32_t sample_time_ms,
             uint status_led_pin,
             RobotPins pins
             );
@@ -70,11 +68,15 @@ public:
     void setUnicycle(float v, float w);
     RobotState getState();
     RobotOdometry getOdometry();
+    void clearPosition();
     void setPidTunings(float kp, float kd, float ki);
     void updatePid(uint32_t l_encoder_ticks, uint32_t r_encoder_ticks);
     float calculate_rpm(int32_t ticks, float deltaT);
     float calculate_speed(float rpm);
     void adjust_motor_speed_based_on_ticks(int32_t tick_base, int32_t left_ticks, int32_t right_ticks, float* left_speed, float* right_speed);
+
+    // Update PID constants
+    void updatePID(float kp_l, float kd_l, float ki_l, float kp_r, float kd_r, float ki_r);
 
 private:
     float _kp_l;
@@ -105,6 +107,8 @@ private:
     DCMotor _r_motor;
     PID _l_pid;
     PID _r_pid;
+    // PID_Controller _l_pid;
+    // PID_Controller _r_pid;
     uint _status_led_pin;
     RobotState _state;
     RobotOdometry _odom;
@@ -112,6 +116,7 @@ private:
     void controlLoop();
     void updateOdometry(int32_t dl_ticks, int32_t dr_ticks);
     void initPins();
+
 };
 
 #endif //ROBOT_PWM_ROBOT_H

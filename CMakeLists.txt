@@ -16,11 +16,13 @@ add_executable(${PROJECT_NAME}
     src/motor_control.cpp 
     src/pid.cpp 
     src/robot.cpp
+    src/pid_controller.cpp
     include/motor_control.h 
     include/pins.h
     include/config.h
     include/pid.h
     include/robot.h
+    include/pid_controller.h
 )
 
 pico_set_program_name(${PROJECT_NAME} "robot_pwm")

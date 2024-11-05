@@ -11,10 +11,10 @@
 #define LED_PIN 25
 
 //첫번째 모터의 PWM컨트롤 핀
-#define M1_PWM_PIN 2
+#define M1_PWM_PIN 27    //2
 //모터의 방향을 결정하는 Enable A, Enable B
 //Caution!! M1 motor Enalble A, Enable B should be opposite!
-#define M1_DIR_PIN 3
+#define M1_DIR_PIN 26    //3
 
 //두번째 모터의 PWM컨트롤 핀
 #define M2_PWM_PIN 6
@@ -24,11 +24,11 @@
 //버튼핀
 #define POT_PIN 26
 //첫 번째 모터에 부착된 엔코더 인터럽트 핀(2채널)
-#define M1_ENC_A_PIN 10
-#define M1_ENC_B_PIN 11
+#define M1_ENC_A_PIN 18 //before 10
+#define M1_ENC_B_PIN 19 //before 11
 //두 번째 모터에 부착된 엔코더 인터럽트 핀(2채널)
 #define M2_ENC_A_PIN 13
-#define M2_ENC_B_PIN 12
+#define M2_ENC_B_PIN 12///
 //true, false를 정의한 define
 //Not used define
 #define M1_ENC_INVERTED false

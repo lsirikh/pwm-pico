@@ -2,11 +2,11 @@
 #define ROBOT_PWM_CONFIG_H
 
 //모터(Left) 최대/최소 속도
-#define L_MOTOR_MIN_SPEED -1.0f
-#define L_MOTOR_MAX_SPEED 1.0f
+#define L_MOTOR_MIN_SPEED -0.5f
+#define L_MOTOR_MAX_SPEED 0.5f
 //모터(Right) 최대/최소 속도
-#define R_MOTOR_MIN_SPEED -1.0f
-#define R_MOTOR_MAX_SPEED 1.0f
+#define R_MOTOR_MIN_SPEED -0.5f
+#define R_MOTOR_MAX_SPEED 0.5f
 
 
 //Motor spec
@@ -34,7 +34,7 @@
 //2Channel Multiply
 //HIGH EDGE, LOW EDGE 2 Signal
 //Planetary gear 모터로 50:1의 비율
-// 16 x 2 x 50 x 2 = 3200 PPR (1Tick 당 0.225도 )
+// 16 x 2 x 2 x 50 = 3200 PPR (1Tick 당 0.225도 )
 //3200 PPR 모터의 경우 1 tick당 회전 각도는 0.1125도입니다.
 #define ROBOT_MOTOR_PPR 3200.0f
 //바퀴 반지름
@@ -42,9 +42,13 @@
 //축간거리
 #define ROBOT_WHEEL_SEPARATION 0.34f
 //Motor 직선 속도, Motor 각속도
-#define ROBOT_MAX_LINEAR_M_S 0.2
-#define ROBOT_MIN_LINEAR_M_S -0.2
-#define ROBOT_MAX_ANGULAR_R_S 1.0
-#define ROBOT_MIN_ANGULAR_R_S -1.0
+// #define ROBOT_MAX_LINEAR_M_S 0.08
+// #define ROBOT_MIN_LINEAR_M_S -0.08
+// #define ROBOT_MAX_ANGULAR_R_S 0.25
+// #define ROBOT_MIN_ANGULAR_R_S -0.25
+#define ROBOT_MAX_LINEAR_M_S 0.1
+#define ROBOT_MIN_LINEAR_M_S -0.1
+#define ROBOT_MAX_ANGULAR_R_S 0.25
+#define ROBOT_MIN_ANGULAR_R_S -0.25
 
 #endif //ROBOT_PWM_CONFIG_H

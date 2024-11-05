@@ -32,7 +32,7 @@ cmake .. && make && sudo mount /dev/sda1 /media/pico/ && sudo cp robot_pwm.uf2 /
 
 3. 해당 로직이 구현되면, 신호수집을 위한 ROS2 코드를 구성한다. 
 
-### v1.0
+### v1.0  
 1. 현재의 PID 세팅값은 아래와 같다.
 <P>
 ** 현재는 무부하시 1분간 전진을 할 경우 : 약 50 tick diff  <br>
@@ -43,3 +43,44 @@ cmake .. && make && sudo mount /dev/sda1 /media/pico/ && sudo cp robot_pwm.uf2 /
 
 2. 이제 시리얼로 Linearity를 제어하여 원격제어하는 로직구현되어 있다.
 3. 해당 로직이 구현되면, 신호수집을 위한 ROS2 코드가 구현되어 있다.  
+
+### v1.1  
+### Date: 2024-11-02
+1. CRC를 적용하여 데이터 전송에 안정성을 확보하였다.  
+2. USB Serial 데이터 통신에 불안정한 요소는 여전히 존재하나 물리적인 케이블 교체 및 Baudrate 변경을 통해 디버깅이 필요하다.  
+3. 새로 구매한 24V DC 모터(같은 모델)를 적용하여 PID 수정이 필요하다.  
+
+### v1.2  
+### Date: 2024-11-06
+1. ctx와 ext를 4byte씩 할당하여 전체적인 메시지의 구조체를 구현하였다.   
+```
+#pragma pack(push, 1)  // 구조체 패딩을 제거하여 정확한 바이트 배열을 유지
+struct Message {
+    uint16_t ctx;             // 2바이트, 시작 표시자 (예: 0x1234)
+    float l_speed;            // 4바이트, 왼쪽 바퀴 속도
+    float r_speed;            // 4바이트, 오른쪽 바퀴 속도
+    float x_pos;              // 4바이트, x 좌표
+    float y_pos;              // 4바이트, y 좌표
+    float theta;              // 4바이트, 방향 각도
+    float v;                  // 4바이트, 직선 속도
+    float w;                  // 4바이트, 각속도
+    uint16_t crc;             // 2바이트, CRC-16-CCITT
+    uint16_t ext;             // 2바이트, 종료 표시자 (예: 0x5678)
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+struct ControlMessage {
+    uint16_t ctx;      // 2바이트, 시작 표시자 (예: 0x1234)
+    float linear;      // 4바이트, 직선 속도 명령
+    float angular;     // 4바이트, 각속도 명령
+    uint16_t crc;      // 2바이트, CRC-16-CCITT
+    uint16_t ext;      // 2바이트, 종료 표시자 (예: 0x5678)
+};
+#pragma pack(pop)
+
+```
+
+2. 메시지의 본문에 해당하는 내용만 CRC로 계산하였다.  
+3. 라즈베리파이와 메시지 연동하는 과정에서 에러에 의한 누락이 거의 제거되었다.  
+
