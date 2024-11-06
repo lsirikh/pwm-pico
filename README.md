@@ -84,3 +84,36 @@ struct ControlMessage {
 2. 메시지의 본문에 해당하는 내용만 CRC로 계산하였다.  
 3. 라즈베리파이와 메시지 연동하는 과정에서 에러에 의한 누락이 거의 제거되었다.  
 
+
+### v1.3
+### Date: 2024-11-07
+
+1. ControlMessage를 command라는 속성을 추가하여 command에 따라 speed command, pid update 두가지 기능으로 분화하였다.  
+```
+#pragma pack(push, 1)
+struct ControlMessage {
+    uint16_t ctx;        // 2바이트
+    uint16_t command_type; // 2바이트
+    union {
+        struct {
+            float linear;      // 4바이트
+            float angular;     // 4바이트
+            uint16_t crc;        // 2바이트
+            uint16_t ext;        // 2바이트
+        } speed_command;
+        struct {
+            float kp_left;     // 4바이트
+            float ki_left;     // 4바이트
+            float kd_left;     // 4바이트
+            float kp_right;    // 4바이트
+            float ki_right;    // 4바이트
+            float kd_right;    // 4바이트
+            uint16_t crc;        // 2바이트
+            uint16_t ext;        // 2바이트
+        } pid_update;
+    };
+};
+#pragma pack(pop)
+
+```
+2. 물론 receiveMessage 역시 해당 구조에 따라 변경되었다.  
