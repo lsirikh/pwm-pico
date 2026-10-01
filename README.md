@@ -1,3 +1,25 @@
+# Pico Differential Drive Controller
+
+Raspberry Pi Pico에서 두 모터의 PWM 출력과 엔코더 입력을 처리하는 차동 구동 로봇 펌웨어입니다. 엔코더로 속도를 계산하고 PID 제어와 오도메트리 계산을 수행합니다.
+
+## 코드 구성
+
+- [main.cpp](main.cpp): 펌웨어 진입점
+- [src/robot.cpp](src/robot.cpp): 좌우 바퀴 목표 속도, PID 갱신, 오도메트리와 차동 구동 변환
+- [src](src): 모터 제어와 PID 구현
+- [include](include): 제어기 인터페이스와 설정
+
+## 하드웨어와 빌드
+
+기존 실험 구성은 Pico, MD10CR3 모터 드라이버 2개, 24V 엔코더 모터 2개입니다. 핀 번호, 엔코더 분해능, 휠 치수와 PID 계수는 사용 장비에 맞춰야 합니다.
+
+Pico SDK, ARM 툴체인과 CMake를 준비하고 `CMakeLists.txt`의 SDK 경로를 확인한 뒤 별도 빌드 폴더에서 빌드합니다. 생성된 UF2는 Pico를 BOOTSEL 모드로 연결해 해당 드라이브에 복사합니다.
+
+[integrated_robot_control](https://github.com/lsirikh/integrated_robot_control)과 연결할 때는 호스트와 펌웨어의 시리얼 메시지 형식도 맞춰야 합니다. 아래는 개발 당시의 장비·튜닝 기록입니다.
+
+<details>
+<summary>기존 개발 기록 및 참고 자료</summary>
+
 ## Raspberry pi pico PWM dual motor controller
 
 ** developer : GH  
@@ -14,7 +36,6 @@
 ### Build
 
 ```
-cmake .. && make && sudo mount /dev/sda1 /media/pico/ && sudo cp robot_pwm.uf2 /media/pico/ && sudo umount /media/pico/
 
 ```
 
@@ -116,4 +137,6 @@ struct ControlMessage {
 #pragma pack(pop)
 
 ```
-2. 물론 receiveMessage 역시 해당 구조에 따라 변경되었다.  
+2. 물론 receiveMessage 역시 해당 구조에 따라 변경되었다.
+
+</details>
